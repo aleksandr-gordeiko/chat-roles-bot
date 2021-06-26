@@ -1,0 +1,10 @@
+{
+  "extends": "airbnb-typescript/base",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "no-await-in-loop": "off",
+    "no-console": "off"
+  }
+}
