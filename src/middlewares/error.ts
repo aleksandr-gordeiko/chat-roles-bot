@@ -1,4 +1,6 @@
-const error = async (ctx, next) => {
+import { Context } from 'telegraf';
+
+const error = async (ctx: Context, next: () => any) => {
   try {
     await next();
   } catch (err) {

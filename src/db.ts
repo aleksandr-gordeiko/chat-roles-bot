@@ -8,11 +8,11 @@ import {
 
 const { MongoClient } = require('mongodb');
 
-const url = `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/`;
+const url: string = `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/`;
 let client;
 let db;
 
-const connect = async () => {
+const connect = async (): Promise<void> => {
   try {
     client = await MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
     db = client.db(process.env.MONGO_DB_NAME);
@@ -21,7 +21,7 @@ const connect = async () => {
   }
 };
 
-const closeConnection = async () => {
+const closeConnection = async (): Promise<void> => {
   try {
     await client.close();
   } catch (err) {
@@ -29,7 +29,7 @@ const closeConnection = async () => {
   }
 };
 
-const addOrUpdateUser = async (user) => {
+const addOrUpdateUser = async (user): Promise<string> => {
   const collection = db.collection('users');
   const cursor = await collection.find({ id: user.id });
   if ((await cursor.count()) === 0) {
@@ -43,7 +43,7 @@ const addOrUpdateUser = async (user) => {
   return registerReplyCodes.ALREADY_REGISTERED;
 };
 
-const deleteUser = async (user) => {
+const deleteUser = async (user): Promise<string> => {
   const collection = db.collection('users');
   if (await collection.find({ id: user.id }).count() !== 0) {
     await collection.deleteOne({ id: user.id });
@@ -54,7 +54,7 @@ const deleteUser = async (user) => {
 
 const getAllUsers = async (): Promise<string[] | string> => {
   const collection = db.collection('users');
-  const usernames = [];
+  const usernames: string[] = [];
   const cursor = await collection.find();
 
   if (!(await cursor.hasNext())) return showReplyCodes.NO_USERS_FOUND;
@@ -66,7 +66,7 @@ const getAllUsers = async (): Promise<string[] | string> => {
   return usernames;
 };
 
-const addUserIdToRole = async (user, collection_name) => {
+const addUserIdToRole = async (user, collection_name: string): Promise<string> => {
   const collection = db.collection(collection_name);
   const cursor = await collection.find({ id: user.id });
   if ((await cursor.count()) === 0) {
@@ -76,7 +76,7 @@ const addUserIdToRole = async (user, collection_name) => {
   return joinReplyCodes.ALREADY_REGISTERED;
 };
 
-const removeUserFromRole = async (user, collection_name) => {
+const removeUserFromRole = async (user, collection_name: string): Promise<string> => {
   let collection;
   try {
     collection = db.collection(collection_name);

@@ -1,10 +1,12 @@
-const reply = async (ctx, next) => {
-  ctx.reply_code = null;
+import { Context } from 'telegraf';
+
+const reply = async (ctx: Context, next: () => any) => {
+  ctx.state.reply_code = null;
   await next();
 
   // ctx.reply(`@${ctx.from.username}`, { parse_mode: 'MarkdownV2' });
 
-  if (ctx.reply_code !== null) { ctx.reply(ctx.reply_code); }
+  if (ctx.state.reply_code !== null) { await ctx.reply(ctx.state.reply_code); }
 };
 
 export default reply;
