@@ -5,7 +5,7 @@ import { addUserIdToRole } from '../db';
 
 const join = async (ctx: Context) => {
   const user = ctx.from;
-  const role = ctx.message.toString().split(' ').slice(1).join('');
+  const role = ctx.message.toString().split(' ').slice(1).join('_');
 
   if (role === '') {
     ctx.state.reply_code = joinReplyCodes.INVALID_ARGUMENT;

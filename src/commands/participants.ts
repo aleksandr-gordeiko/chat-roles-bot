@@ -1,10 +1,10 @@
 import { Context } from 'telegraf';
 
-import { getAllUsers } from '../db';
+import { getAllUsernames } from '../db';
 import { showReplyCodes } from '../reply_codes';
 
 const participants = async (ctx: Context): Promise<void> => {
-  await getAllUsers()
+  await getAllUsernames()
     .then((res: string[] | string) => {
       if (res === showReplyCodes.NO_USERS_FOUND) {
         ctx.state.reply_code = res;

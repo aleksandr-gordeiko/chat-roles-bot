@@ -21,8 +21,13 @@ const joinReplyCodes = {
 
 const leaveReplyCodes = {
   DELETED: 'Unassigned role successfully',
-  COLLECTION_DOES_NOT_EXIST: 'An error occurred deleting user',
-  ERROR: 'An error occurred while leaving role',
+  COLLECTION_DOES_NOT_EXIST: 'The role does not exist',
+  USER_NOT_IN_COLLECTION: 'User does not have this role',
+};
+
+const getRoleReplyCodes = {
+  COLLECTION_DOES_NOT_EXIST: 'The role does not exist',
+  COLLECTION_EMPTY: 'No users have this role',
 };
 
 export {
@@ -31,4 +36,5 @@ export {
   showReplyCodes,
   joinReplyCodes,
   leaveReplyCodes,
+  getRoleReplyCodes,
 };

@@ -3,7 +3,7 @@ import {
   unregisterReplyCodes,
   showReplyCodes,
   joinReplyCodes,
-  leaveReplyCodes,
+  leaveReplyCodes, getRoleReplyCodes,
 } from './reply_codes';
 
 const { MongoClient } = require('mongodb');
@@ -52,7 +52,7 @@ const deleteUser = async (user): Promise<string> => {
   return unregisterReplyCodes.ERROR;
 };
 
-const getAllUsers = async (): Promise<string[] | string> => {
+const getAllUsernames = async (): Promise<string[] | string> => {
   const collection = db.collection('users');
   const usernames: string[] = [];
   const cursor = await collection.find();
@@ -88,15 +88,42 @@ const removeUserFromRole = async (user, collection_name: string): Promise<string
     await collection.deleteOne({ id: user.id });
     return leaveReplyCodes.DELETED;
   }
-  return leaveReplyCodes.ERROR;
+  return leaveReplyCodes.USER_NOT_IN_COLLECTION;
+};
+
+const getUserIdsAndUsernamesFromRole = async (collection_name: string): Promise<string | Object> => {
+  let roleCollection;
+  try {
+    roleCollection = db.collection(collection_name);
+  } catch {
+    return getRoleReplyCodes.COLLECTION_DOES_NOT_EXIST;
+  }
+  const cursor = roleCollection.find();
+  if ((await cursor.count() === 0)) {
+    return getRoleReplyCodes.COLLECTION_EMPTY;
+  }
+
+  const ids: string[] = [];
+  while (await cursor.hasNext()) {
+    ids.push((await cursor.next()).id);
+  }
+
+  const usersCollection = db.collection('users');
+  const idsAndUsernames: Object = {};
+  for (const value of ids) {
+    idsAndUsernames[value] = (await (await usersCollection.find({ id: value })).next()).username;
+  }
+
+  return idsAndUsernames;
 };
 
 export {
   addOrUpdateUser,
   deleteUser,
-  getAllUsers,
+  getAllUsernames,
   addUserIdToRole,
   removeUserFromRole,
   connect,
   closeConnection,
+  getUserIdsAndUsernamesFromRole,
 };

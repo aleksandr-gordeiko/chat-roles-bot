@@ -37,3 +37,5 @@ process.once('SIGTERM', () => {
 connect()
   .then(() => bot.launch())
   .catch((err) => console.log(err));
+
+// TODO Add user deletion from all roles when unregistering
