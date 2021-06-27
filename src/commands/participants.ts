@@ -18,7 +18,8 @@ const participants = async (ctx: Context): Promise<void> => {
         });
         ctx.reply(reply);
       }
-    });
+    })
+    .catch((err) => { throw new Error(err); });
 };
 
 export default participants;

@@ -98,8 +98,8 @@ const getUserIdsAndUsernamesFromRole = async (collection_name: string): Promise<
   } catch {
     return getRoleReplyCodes.COLLECTION_DOES_NOT_EXIST;
   }
-  const cursor = roleCollection.find();
-  if ((await cursor.count() === 0)) {
+  const cursor = await roleCollection.find();
+  if ((await cursor.count()) === 0) {
     return getRoleReplyCodes.COLLECTION_EMPTY;
   }
 

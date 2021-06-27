@@ -5,6 +5,7 @@ const error = async (ctx: Context, next: () => any) => {
     await next();
   } catch (err) {
     console.log(err);
+    await ctx.reply('An internal error occurred');
   }
 };
 
