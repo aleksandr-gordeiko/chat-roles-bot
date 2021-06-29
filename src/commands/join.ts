@@ -1,9 +1,12 @@
+import { Context } from 'telegraf';
+import { Message, User } from 'typegram';
+
 import { joinReplyCodes } from '../reply_codes';
 import { addUserIdToRole } from '../db';
 
-const join = async (ctx) => {
-  const user = ctx.from;
-  const role = ctx.message.text.split(' ').slice(1).join('_');
+const join = async (ctx: Context) => {
+  const user: User = ctx.from;
+  const role: string = (ctx.message as Message.TextMessage).text.split(' ').slice(1).join('_');
 
   if (role === '') {
     ctx.state.reply_code = joinReplyCodes.INVALID_ARGUMENT;

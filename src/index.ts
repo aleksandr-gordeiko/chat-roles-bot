@@ -11,7 +11,7 @@ import participants from './commands/participants';
 import join from './commands/join';
 import leave from './commands/leave';
 
-const bot = new Telegraf(process.env.BOT_API_TOKEN);
+const bot: Telegraf = new Telegraf(process.env.BOT_API_TOKEN);
 
 bot.use(reply);
 bot.use(error);

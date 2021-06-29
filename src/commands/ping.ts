@@ -1,9 +1,12 @@
+import { Context } from 'telegraf';
+import { Message } from 'typegram';
+
 import { getUserIdsAndUsernamesFromRole } from '../db';
 import { getRoleReplyCodes } from '../reply_codes';
 
-const ping = async (ctx): Promise<void> => {
-  const user = ctx.from.username;
-  const args: string[] = ctx.message.text.split(' ');
+const ping = async (ctx: Context): Promise<void> => {
+  const user: string = ctx.from.username;
+  const args: string[] = (ctx.message as Message.TextMessage).text.split(' ');
   const role: string = args[1];
   const message: string = args.slice(2).join(' ');
 
@@ -20,7 +23,7 @@ const ping = async (ctx): Promise<void> => {
         for (const id in res) {
           pings += `[@${res[id]}](tg://user?id=${id}) `;
         }
-        const reply = `${user}:\n${message}\n${pings}`;
+        const reply: string = `${user}:\n${message}\n${pings}`;
         await ctx.reply(reply, { parse_mode: 'Markdown' });
       }
     })

@@ -1,3 +1,5 @@
+import { User } from 'typegram';
+
 import {
   registerReplyCodes,
   unregisterReplyCodes,
@@ -29,7 +31,7 @@ const closeConnection = async (): Promise<void> => {
   }
 };
 
-const addOrUpdateUser = async (user): Promise<string> => {
+const addOrUpdateUser = async (user: User): Promise<string> => {
   const collection = db.collection('users');
   const cursor = await collection.find({ id: user.id });
   if ((await cursor.count()) === 0) {
@@ -43,7 +45,7 @@ const addOrUpdateUser = async (user): Promise<string> => {
   return registerReplyCodes.ALREADY_REGISTERED;
 };
 
-const deleteUser = async (user): Promise<string> => {
+const deleteUser = async (user: User): Promise<string> => {
   const collection = db.collection('users');
   if (await collection.find({ id: user.id }).count() !== 0) {
     await collection.deleteOne({ id: user.id });
@@ -66,7 +68,7 @@ const getAllUsernames = async (): Promise<string[] | string> => {
   return usernames;
 };
 
-const addUserIdToRole = async (user, collection_name: string): Promise<string> => {
+const addUserIdToRole = async (user: User, collection_name: string): Promise<string> => {
   const collection = db.collection(collection_name);
   const cursor = await collection.find({ id: user.id });
   if ((await cursor.count()) === 0) {
@@ -76,7 +78,7 @@ const addUserIdToRole = async (user, collection_name: string): Promise<string> =
   return joinReplyCodes.ALREADY_REGISTERED;
 };
 
-const removeUserFromRole = async (user, collection_name: string): Promise<string> => {
+const removeUserFromRole = async (user: User, collection_name: string): Promise<string> => {
   let collection;
   try {
     collection = db.collection(collection_name);
