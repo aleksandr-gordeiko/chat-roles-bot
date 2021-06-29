@@ -31,8 +31,8 @@ const closeConnection = async (): Promise<void> => {
   }
 };
 
-const addOrUpdateUser = async (user: User): Promise<string> => {
-  const collection = db.collection('users');
+const addOrUpdateUser = async (user: User, chat_id: number): Promise<string> => {
+  const collection = db.collection(`${chat_id}_users`);
   const cursor = await collection.find({ id: user.id });
   if ((await cursor.count()) === 0) {
     await collection.insertOne(user);
@@ -45,8 +45,8 @@ const addOrUpdateUser = async (user: User): Promise<string> => {
   return registerReplyCodes.ALREADY_REGISTERED;
 };
 
-const deleteUser = async (user: User): Promise<string> => {
-  const collection = db.collection('users');
+const deleteUser = async (user: User, chat_id: number): Promise<string> => {
+  const collection = db.collection(`${chat_id}_users`);
   if (await collection.find({ id: user.id }).count() !== 0) {
     await collection.deleteOne({ id: user.id });
     return unregisterReplyCodes.DELETED;
@@ -54,8 +54,8 @@ const deleteUser = async (user: User): Promise<string> => {
   return unregisterReplyCodes.ERROR;
 };
 
-const getAllUsernames = async (): Promise<string[] | string> => {
-  const collection = db.collection('users');
+const getAllUsernames = async (chat_id: number): Promise<string[] | string> => {
+  const collection = db.collection(`${chat_id}_users`);
   const usernames: string[] = [];
   const cursor = await collection.find();
 
@@ -68,8 +68,8 @@ const getAllUsernames = async (): Promise<string[] | string> => {
   return usernames;
 };
 
-const addUserIdToRole = async (user: User, collection_name: string): Promise<string> => {
-  const collection = db.collection(collection_name);
+const addUserIdToRole = async (user: User, collection_name: string, chat_id: number): Promise<string> => {
+  const collection = db.collection(`${chat_id}_${collection_name}`);
   const cursor = await collection.find({ id: user.id });
   if ((await cursor.count()) === 0) {
     await collection.insertOne({ id: user.id });
@@ -78,10 +78,10 @@ const addUserIdToRole = async (user: User, collection_name: string): Promise<str
   return joinReplyCodes.ALREADY_REGISTERED;
 };
 
-const removeUserFromRole = async (user: User, collection_name: string): Promise<string> => {
+const removeUserFromRole = async (user: User, collection_name: string, chat_id: number): Promise<string> => {
   let collection;
   try {
-    collection = db.collection(collection_name);
+    collection = db.collection(`${chat_id}_${collection_name}`);
   } catch {
     return leaveReplyCodes.COLLECTION_DOES_NOT_EXIST;
   }
@@ -93,10 +93,10 @@ const removeUserFromRole = async (user: User, collection_name: string): Promise<
   return leaveReplyCodes.USER_NOT_IN_COLLECTION;
 };
 
-const getUserIdsAndUsernamesFromRole = async (collection_name: string): Promise<string | Object> => {
+const getUserIdsAndUsernamesFromRole = async (collection_name: string, chat_id: number): Promise<string | Object> => {
   let roleCollection;
   try {
-    roleCollection = db.collection(collection_name);
+    roleCollection = db.collection(`${chat_id}_${collection_name}`);
   } catch {
     return getRoleReplyCodes.COLLECTION_DOES_NOT_EXIST;
   }
@@ -110,7 +110,7 @@ const getUserIdsAndUsernamesFromRole = async (collection_name: string): Promise<
     ids.push((await cursor.next()).id);
   }
 
-  const usersCollection = db.collection('users');
+  const usersCollection = db.collection(`${chat_id}_users`);
   const idsAndUsernames: Object = {};
   for (const value of ids) {
     idsAndUsernames[value] = (await (await usersCollection.find({ id: value })).next()).username;

@@ -6,11 +6,12 @@ import { getRoleReplyCodes } from '../reply_codes';
 
 const ping = async (ctx: Context): Promise<void> => {
   const user: string = ctx.from.username;
+  const chatId: number = ctx.chat.id;
   const args: string[] = (ctx.message as Message.TextMessage).text.split(' ');
   const role: string = args[1];
   const message: string = args.slice(2).join(' ');
 
-  await getUserIdsAndUsernamesFromRole(role)
+  await getUserIdsAndUsernamesFromRole(role, chatId)
     .then(async (res: string | Object) => {
       if (res === getRoleReplyCodes.COLLECTION_EMPTY
         || res === getRoleReplyCodes.COLLECTION_DOES_NOT_EXIST) {

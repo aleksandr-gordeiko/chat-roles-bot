@@ -4,7 +4,8 @@ import { getAllUsernames } from '../db';
 import { showReplyCodes } from '../reply_codes';
 
 const participants = async (ctx: Context): Promise<void> => {
-  await getAllUsernames()
+  const chatId: number = ctx.chat.id;
+  await getAllUsernames(chatId)
     .then((res: string[] | string) => {
       if (res === showReplyCodes.NO_USERS_FOUND) {
         ctx.state.reply_code = res;
