@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/node": "^15.12.4",
+    "@types/mongodb": "^3.6.18",
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "eslint": "^7.29.0",
     "eslint-config-airbnb-typescript": "^12.3.1",

@@ -1,4 +1,7 @@
 import { User } from 'typegram';
+import {
+  Collection, CommandCursor, Cursor, Db,
+} from 'mongodb';
 
 import {
   registerReplyCodes,
@@ -11,14 +14,15 @@ import {
 const { MongoClient } = require('mongodb');
 
 const url: string = `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/`;
-let client;
-let db;
+let client: typeof MongoClient;
+let db: Db;
 
 const getChatCollections = async (chat_id: number): Promise<string[]> => {
-  const cursor = await db.listCollections({ name: new RegExp(`^${chat_id}`) }, true);
+  const cursor: CommandCursor = db.listCollections({ name: new RegExp(`^${chat_id}`) }, { nameOnly: true });
   const collections: string[] = [];
   while (await cursor.hasNext()) {
-    collections.push((await cursor.next()).name);
+    const next: any = await cursor.next();
+    collections.push(next.name);
   }
   return collections;
 };
@@ -41,8 +45,8 @@ const closeConnection = async (): Promise<void> => {
 };
 
 const addOrUpdateUser = async (user: User, chat_id: number): Promise<string> => {
-  const collection = db.collection(chat_id.toString());
-  const cursor = await collection.find({ id: user.id });
+  const collection: Collection = db.collection(chat_id.toString());
+  const cursor: Cursor = await collection.find({ id: user.id });
   if ((await cursor.count()) === 0) {
     await collection.insertOne(user);
     return registerReplyCodes.ADDED;
@@ -58,7 +62,7 @@ const deleteUser = async (user: User, chat_id: number): Promise<string> => {
   try {
     const collections: string[] = await getChatCollections(chat_id);
     for (const collectionName of collections) {
-      const collection = db.collection(collectionName);
+      const collection: Collection = db.collection(collectionName);
       if (await collection.find({ id: user.id })
         .count() !== 0) {
         await collection.deleteOne({ id: user.id });
@@ -71,9 +75,9 @@ const deleteUser = async (user: User, chat_id: number): Promise<string> => {
 };
 
 const getAllUsernames = async (chat_id: number): Promise<string[] | string> => {
-  const collection = db.collection(chat_id.toString());
+  const collection: Collection = db.collection(chat_id.toString());
   const usernames: string[] = [];
-  const cursor = await collection.find();
+  const cursor: Cursor = await collection.find();
 
   if (!(await cursor.hasNext())) return showReplyCodes.NO_USERS_FOUND;
 
@@ -85,8 +89,8 @@ const getAllUsernames = async (chat_id: number): Promise<string[] | string> => {
 };
 
 const addUserIdToRole = async (user: User, collection_name: string, chat_id: number): Promise<string> => {
-  const collection = db.collection(`${chat_id}_${collection_name}`);
-  const cursor = await collection.find({ id: user.id });
+  const collection: Collection = db.collection(`${chat_id}_${collection_name}`);
+  const cursor: Cursor = await collection.find({ id: user.id });
   if ((await cursor.count()) === 0) {
     await collection.insertOne({ id: user.id });
     return joinReplyCodes.ADDED;
@@ -95,7 +99,7 @@ const addUserIdToRole = async (user: User, collection_name: string, chat_id: num
 };
 
 const removeUserFromRole = async (user: User, collection_name: string, chat_id: number): Promise<string> => {
-  let collection;
+  let collection: Collection;
   try {
     collection = db.collection(`${chat_id}_${collection_name}`);
   } catch {
@@ -110,13 +114,13 @@ const removeUserFromRole = async (user: User, collection_name: string, chat_id: 
 };
 
 const getUserIdsAndUsernamesFromRole = async (collection_name: string, chat_id: number): Promise<string | Object> => {
-  let roleCollection;
+  let roleCollection: Collection;
   try {
     roleCollection = db.collection(`${chat_id}_${collection_name}`);
   } catch {
     return getRoleReplyCodes.COLLECTION_DOES_NOT_EXIST;
   }
-  const cursor = await roleCollection.find();
+  const cursor: Cursor = await roleCollection.find();
   if ((await cursor.count()) === 0) {
     return getRoleReplyCodes.COLLECTION_EMPTY;
   }
@@ -126,7 +130,7 @@ const getUserIdsAndUsernamesFromRole = async (collection_name: string, chat_id: 
     ids.push((await cursor.next()).id);
   }
 
-  const usersCollection = db.collection(chat_id.toString());
+  const usersCollection: Collection = db.collection(chat_id.toString());
   const idsAndUsernames: Object = {};
   for (const value of ids) {
     idsAndUsernames[value] = (await (await usersCollection.find({ id: value })).next()).username;
