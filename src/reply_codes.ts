@@ -10,7 +10,8 @@ const registerReplyCodes = {
 
 const unregisterReplyCodes = {
   DELETED: 'User deleted successfully',
-  ERROR: 'An error occurred deleting user',
+  NOT_REGISTERED: 'User is not registered',
+  ERROR: 'An error occurred while deleting user',
 };
 
 const joinReplyCodes = {

@@ -14,6 +14,15 @@ const url: string = `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_POR
 let client;
 let db;
 
+const getChatCollections = async (chat_id: number): Promise<string[]> => {
+  const cursor = await db.listCollections({ name: new RegExp(`^${chat_id}`) }, true);
+  const collections: string[] = [];
+  while (await cursor.hasNext()) {
+    collections.push((await cursor.next()).name);
+  }
+  return collections;
+};
+
 const connect = async (): Promise<void> => {
   try {
     client = await MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -32,7 +41,7 @@ const closeConnection = async (): Promise<void> => {
 };
 
 const addOrUpdateUser = async (user: User, chat_id: number): Promise<string> => {
-  const collection = db.collection(`${chat_id}_users`);
+  const collection = db.collection(chat_id.toString());
   const cursor = await collection.find({ id: user.id });
   if ((await cursor.count()) === 0) {
     await collection.insertOne(user);
@@ -46,16 +55,23 @@ const addOrUpdateUser = async (user: User, chat_id: number): Promise<string> => 
 };
 
 const deleteUser = async (user: User, chat_id: number): Promise<string> => {
-  const collection = db.collection(`${chat_id}_users`);
-  if (await collection.find({ id: user.id }).count() !== 0) {
-    await collection.deleteOne({ id: user.id });
+  try {
+    const collections: string[] = await getChatCollections(chat_id);
+    for (const collectionName of collections) {
+      const collection = db.collection(collectionName);
+      if (await collection.find({ id: user.id })
+        .count() !== 0) {
+        await collection.deleteOne({ id: user.id });
+      } else if (!collectionName.includes('_')) return unregisterReplyCodes.NOT_REGISTERED;
+    }
     return unregisterReplyCodes.DELETED;
+  } catch (err) {
+    return unregisterReplyCodes.ERROR;
   }
-  return unregisterReplyCodes.ERROR;
 };
 
 const getAllUsernames = async (chat_id: number): Promise<string[] | string> => {
-  const collection = db.collection(`${chat_id}_users`);
+  const collection = db.collection(chat_id.toString());
   const usernames: string[] = [];
   const cursor = await collection.find();
 
@@ -110,7 +126,7 @@ const getUserIdsAndUsernamesFromRole = async (collection_name: string, chat_id: 
     ids.push((await cursor.next()).id);
   }
 
-  const usersCollection = db.collection(`${chat_id}_users`);
+  const usersCollection = db.collection(chat_id.toString());
   const idsAndUsernames: Object = {};
   for (const value of ids) {
     idsAndUsernames[value] = (await (await usersCollection.find({ id: value })).next()).username;
