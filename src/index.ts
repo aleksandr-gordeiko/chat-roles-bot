@@ -10,6 +10,7 @@ import unregister from './commands/unregister';
 import participants from './commands/participants';
 import join from './commands/join';
 import leave from './commands/leave';
+import inline from './inline';
 
 const bot: Telegraf = new Telegraf(process.env.BOT_API_TOKEN);
 
@@ -22,6 +23,8 @@ bot.command('unregister', unregister);
 bot.command('participants', participants);
 bot.command('join', join);
 bot.command('leave', leave);
+
+bot.on('inline_query', inline);
 
 process.once('SIGINT', () => {
   closeConnection()
@@ -37,5 +40,3 @@ process.once('SIGTERM', () => {
 connect()
   .then(() => bot.launch())
   .catch((err) => console.log(err));
-
-// TODO Add user deletion from all roles when unregistering
