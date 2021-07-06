@@ -32,6 +32,13 @@ const closeConnection = async (): Promise<void> => {
   }
 };
 
+const saveOrUpdateUser = async (user: User): Promise<void> => {
+  const collection: Collection = db.collection('users');
+  const cursor: Cursor = collection.find({ id: user.id });
+  if (await cursor.count() !== 0) await collection.updateOne({ id: user.id }, { $set: user });
+  else await collection.insertOne(user);
+};
+
 const addUserIdToRole = async (user: User, roleName: string, chatId: number): Promise<string> => {
   const collection: Collection = db.collection(String(chatId));
   const cursor: Cursor = await collection.find({ role: roleName });
@@ -93,6 +100,7 @@ const getUserIdsAndUsernamesFromRole = async (roleName: string, chatId: number):
 };
 
 export {
+  saveOrUpdateUser,
   addUserIdToRole,
   removeUserFromRole,
   connectDB,

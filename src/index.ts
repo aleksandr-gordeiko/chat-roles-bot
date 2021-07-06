@@ -3,6 +3,7 @@ import { connectDB, closeConnection } from './db';
 
 import reply from './middlewares/reply';
 import error from './middlewares/error';
+import rememberUser from './middlewares/remember_user';
 
 import ping from './commands/ping';
 import join from './commands/join';
@@ -13,6 +14,7 @@ const bot: Telegraf = new Telegraf(process.env.BOT_API_TOKEN);
 
 bot.use(reply);
 bot.use(error);
+bot.use(rememberUser);
 
 bot.command('ping', ping);
 bot.command('join', join);
