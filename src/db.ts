@@ -1,14 +1,12 @@
 import { User } from 'typegram';
 import {
-  Collection, CommandCursor, Cursor, Db,
+  Collection, Cursor, Db,
 } from 'mongodb';
 
 import {
-  registerReplyCodes,
-  unregisterReplyCodes,
-  showReplyCodes,
   joinReplyCodes,
-  leaveReplyCodes, getRoleReplyCodes,
+  leaveReplyCodes,
+  getRoleReplyCodes,
 } from './reply_codes';
 
 const { MongoClient } = require('mongodb');
@@ -17,17 +15,7 @@ const url: string = `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_POR
 let client: typeof MongoClient;
 let db: Db;
 
-const getChatCollections = async (chat_id: number): Promise<string[]> => {
-  const cursor: CommandCursor = db.listCollections({ name: new RegExp(`^${chat_id}`) }, { nameOnly: true });
-  const collections: string[] = [];
-  while (await cursor.hasNext()) {
-    const next: any = await cursor.next();
-    collections.push(next.name);
-  }
-  return collections;
-};
-
-const connect = async (): Promise<void> => {
+const connectDB = async (): Promise<void> => {
   try {
     client = await MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
     db = client.db(process.env.MONGO_DB_NAME);
@@ -44,93 +32,58 @@ const closeConnection = async (): Promise<void> => {
   }
 };
 
-const addOrUpdateUser = async (user: User, chat_id: number): Promise<string> => {
-  const collection: Collection = db.collection(chat_id.toString());
-  const cursor: Cursor = await collection.find({ id: user.id });
+const addUserIdToRole = async (user: User, roleName: string, chatId: number): Promise<string> => {
+  const collection: Collection = db.collection(String(chatId));
+  const cursor: Cursor = await collection.find({ role: roleName });
   if ((await cursor.count()) === 0) {
-    await collection.insertOne(user);
-    return registerReplyCodes.ADDED;
-  }
-  if ((await cursor.next()).username !== user.username) {
-    await collection.updateOne({ id: user.id }, { $set: { username: user.username } });
-    return registerReplyCodes.UPDATED;
-  }
-  return registerReplyCodes.ALREADY_REGISTERED;
-};
-
-const deleteUser = async (user: User, chat_id: number): Promise<string> => {
-  try {
-    const collections: string[] = await getChatCollections(chat_id);
-    for (const collectionName of collections) {
-      const collection: Collection = db.collection(collectionName);
-      if (await collection.find({ id: user.id })
-        .count() !== 0) {
-        await collection.deleteOne({ id: user.id });
-      } else if (!collectionName.includes('_')) return unregisterReplyCodes.NOT_REGISTERED;
-    }
-    return unregisterReplyCodes.DELETED;
-  } catch (err) {
-    return unregisterReplyCodes.ERROR;
-  }
-};
-
-const getAllUsernames = async (chat_id: number): Promise<string[] | string> => {
-  const collection: Collection = db.collection(chat_id.toString());
-  const usernames: string[] = [];
-  const cursor: Cursor = await collection.find();
-
-  if (!(await cursor.hasNext())) return showReplyCodes.NO_USERS_FOUND;
-
-  while (await cursor.hasNext()) {
-    usernames.push((await cursor.next()).username);
-  }
-
-  return usernames;
-};
-
-const addUserIdToRole = async (user: User, collection_name: string, chat_id: number): Promise<string> => {
-  const collection: Collection = db.collection(`${chat_id}_${collection_name}`);
-  const cursor: Cursor = await collection.find({ id: user.id });
-  if ((await cursor.count()) === 0) {
-    await collection.insertOne({ id: user.id });
+    await collection.insertOne({ role: roleName, ids: [user.id] });
     return joinReplyCodes.ADDED;
   }
-  return joinReplyCodes.ALREADY_REGISTERED;
+  const roleIds: number[] = (await cursor.next()).ids;
+  if (roleIds.includes(user.id)) return joinReplyCodes.ALREADY_REGISTERED;
+
+  roleIds.push(user.id);
+  await collection.updateOne({ role: roleName }, { $set: { ids: roleIds } });
+  return joinReplyCodes.ADDED;
 };
 
-const removeUserFromRole = async (user: User, collection_name: string, chat_id: number): Promise<string> => {
+const removeUserFromRole = async (user: User, roleName: string, chatId: number): Promise<string> => {
   let collection: Collection;
   try {
-    collection = db.collection(`${chat_id}_${collection_name}`);
+    collection = db.collection(String(chatId));
   } catch {
-    return leaveReplyCodes.COLLECTION_DOES_NOT_EXIST;
+    return leaveReplyCodes.ROLE_DOES_NOT_EXIST;
   }
 
-  if (await collection.find({ id: user.id }).count() !== 0) {
-    await collection.deleteOne({ id: user.id });
+  const cursor: Cursor = await collection.find({ role: roleName });
+  if (await cursor.count() === 0) return leaveReplyCodes.ROLE_DOES_NOT_EXIST;
+
+  const roleIds: number[] = (await cursor.next()).ids;
+  const userIdIdx: number = roleIds.indexOf(user.id);
+  if (userIdIdx !== -1) {
+    roleIds.splice(userIdIdx, 1);
+    await collection.updateOne({ role: roleName }, { $set: { ids: roleIds } });
     return leaveReplyCodes.DELETED;
   }
   return leaveReplyCodes.USER_NOT_IN_COLLECTION;
 };
 
-const getUserIdsAndUsernamesFromRole = async (collection_name: string, chat_id: number): Promise<string | Object> => {
-  let roleCollection: Collection;
+const getUserIdsAndUsernamesFromRole = async (roleName: string, chatId: number): Promise<string | Object> => {
+  let collection: Collection;
   try {
-    roleCollection = db.collection(`${chat_id}_${collection_name}`);
+    collection = db.collection(String(chatId));
   } catch {
-    return getRoleReplyCodes.COLLECTION_DOES_NOT_EXIST;
+    return getRoleReplyCodes.ROLE_DOES_NOT_EXIST;
   }
-  const cursor: Cursor = await roleCollection.find();
+
+  const cursor: Cursor = await collection.find({ role: roleName });
   if ((await cursor.count()) === 0) {
-    return getRoleReplyCodes.COLLECTION_EMPTY;
+    return getRoleReplyCodes.ROLE_DOES_NOT_EXIST;
   }
 
-  const ids: string[] = [];
-  while (await cursor.hasNext()) {
-    ids.push((await cursor.next()).id);
-  }
+  const { ids } = await cursor.next();
 
-  const usersCollection: Collection = db.collection(chat_id.toString());
+  const usersCollection: Collection = db.collection('users');
   const idsAndUsernames: Object = {};
   for (const value of ids) {
     idsAndUsernames[value] = (await (await usersCollection.find({ id: value })).next()).username;
@@ -140,12 +93,9 @@ const getUserIdsAndUsernamesFromRole = async (collection_name: string, chat_id: 
 };
 
 export {
-  addOrUpdateUser,
-  deleteUser,
-  getAllUsernames,
   addUserIdToRole,
   removeUserFromRole,
-  connect,
+  connectDB,
   closeConnection,
   getUserIdsAndUsernamesFromRole,
 };

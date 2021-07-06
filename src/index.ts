@@ -1,13 +1,10 @@
 import { Telegraf } from 'telegraf';
-import { connect, closeConnection } from './db';
+import { connectDB, closeConnection } from './db';
 
 import reply from './middlewares/reply';
 import error from './middlewares/error';
 
 import ping from './commands/ping';
-import register from './commands/register';
-import unregister from './commands/unregister';
-import participants from './commands/participants';
 import join from './commands/join';
 import leave from './commands/leave';
 import inline from './inline';
@@ -18,9 +15,6 @@ bot.use(reply);
 bot.use(error);
 
 bot.command('ping', ping);
-bot.command('register', register);
-bot.command('unregister', unregister);
-bot.command('participants', participants);
 bot.command('join', join);
 bot.command('leave', leave);
 
@@ -37,6 +31,6 @@ process.once('SIGTERM', () => {
     .catch(() => console.log('SIGTERM occurred, exiting with no db connection closed'));
 });
 
-connect()
+connectDB()
   .then(() => bot.launch())
   .catch((err) => console.log(err));

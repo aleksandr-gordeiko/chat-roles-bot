@@ -14,7 +14,7 @@ const ping = async (ctx: Context): Promise<void> => {
   await getUserIdsAndUsernamesFromRole(role, chatId)
     .then(async (res: string | Object) => {
       if (res === getRoleReplyCodes.COLLECTION_EMPTY
-        || res === getRoleReplyCodes.COLLECTION_DOES_NOT_EXIST) {
+        || res === getRoleReplyCodes.ROLE_DOES_NOT_EXIST) {
         ctx.state.reply_code = res;
         return;
       }
