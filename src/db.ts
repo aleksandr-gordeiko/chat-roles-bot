@@ -101,7 +101,7 @@ const getUserIdsAndUsernamesFromRole = async (roleName: string, chatId: number):
   return idsAndUsernames;
 };
 
-const getChatRolesUserDoesNotHave = async (chatId: number, userId: number): Promise<string[]> => {
+const getChatRoles = async (chatId: number, userId: number, doesUserHaveIt: boolean): Promise<string[]> => {
   let collection: Collection;
   try {
     collection = db.collection(String(chatId));
@@ -115,11 +115,11 @@ const getChatRolesUserDoesNotHave = async (chatId: number, userId: number): Prom
     const roleObject = await rolesCursor.next();
     const roleUserIds: number[] = roleObject.ids;
 
-    let flag = 0;
+    let flag = false;
     for (const id of roleUserIds) {
-      if (id === userId) flag = 1;
+      if (id === userId) flag = true;
     }
-    if (flag) continue;
+    if (flag !== doesUserHaveIt) continue;
 
     roles.push(roleObject.role);
   }
@@ -133,5 +133,5 @@ export {
   connectDB,
   closeConnection,
   getUserIdsAndUsernamesFromRole,
-  getChatRolesUserDoesNotHave,
+  getChatRoles,
 };

@@ -27,6 +27,12 @@ bot.action(/^[join]+(-[a-z]+)?$/, async (ctx) => {
   return join(ctx);
 });
 
+bot.action(/^[leav]+(-[a-z]+)?$/, async (ctx) => {
+  ctx.answerCbQuery();
+  ctx.state.roleChosen = ctx.match[1].split('-')[1];
+  return leave(ctx);
+});
+
 process.once('SIGINT', () => {
   closeConnection()
     .then(() => console.log('SIGINT occurred, exiting'))

@@ -1,16 +1,33 @@
-import { Context } from 'telegraf';
+import { Context, Markup } from 'telegraf';
 import { Message, User } from 'typegram';
 
 import { leaveReplyCodes } from '../reply_codes';
-import { removeUserFromRole } from '../db';
+import { getChatRoles, removeUserFromRole } from '../db';
 
 const leave = async (ctx: Context) => {
   const user: User = ctx.from;
   const chatId: number = ctx.chat.id;
-  const role: string = (ctx.message as Message.TextMessage).text.split(' ').slice(1).join('_');
+  let role;
+  if (ctx.state.roleChosen) {
+    role = ctx.state.roleChosen;
+  } else {
+    role = (ctx.message as Message.TextMessage).text.split(' ')
+      .slice(1)
+      .join('_');
+  }
 
   if (role === '') {
-    ctx.state.reply_code = leaveReplyCodes.USER_NOT_IN_COLLECTION;
+    await getChatRoles(chatId, user.id, true)
+      .then(async (res) => {
+        if (res.length === 0) ctx.state.reply_code = leaveReplyCodes.USER_DOES_NOT_HAVE_ROLES;
+
+        const buttons = [];
+        for (const resRole of res) {
+          buttons.push([Markup.button.callback(resRole, `leave-${resRole}`)]);
+        }
+
+        await ctx.reply('Choose a role to leave', Markup.inlineKeyboard(buttons));
+      });
     return;
   }
 

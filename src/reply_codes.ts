@@ -8,6 +8,7 @@ const leaveReplyCodes = {
   DELETED: 'Unassigned role successfully',
   ROLE_DOES_NOT_EXIST: 'The role does not exist',
   USER_NOT_IN_COLLECTION: 'User does not have this role',
+  USER_DOES_NOT_HAVE_ROLES: 'User does not have any role',
 };
 
 const getRoleReplyCodes = {

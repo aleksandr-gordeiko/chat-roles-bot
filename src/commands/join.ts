@@ -1,7 +1,7 @@
 import { Context, Markup } from 'telegraf';
 import { Message, User } from 'typegram';
 
-import { addUserIdToRole, getChatRolesUserDoesNotHave } from '../db';
+import { addUserIdToRole, getChatRoles } from '../db';
 import { joinReplyCodes } from '../reply_codes';
 
 const join = async (ctx: Context) => {
@@ -17,7 +17,7 @@ const join = async (ctx: Context) => {
   }
 
   if (role === '') {
-    await getChatRolesUserDoesNotHave(chatId, user.id)
+    await getChatRoles(chatId, user.id, false)
       .then(async (res) => {
         if (res.length === 0) ctx.state.reply_code = joinReplyCodes.NO_ROLES_IN_CHAT;
 
