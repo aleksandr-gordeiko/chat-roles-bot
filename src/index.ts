@@ -8,7 +8,6 @@ import rememberUser from './middlewares/remember_user';
 import ping from './commands/ping';
 import join from './commands/join';
 import leave from './commands/leave';
-import inline from './inline';
 
 const bot: Telegraf = new Telegraf(process.env.BOT_API_TOKEN);
 
@@ -19,8 +18,6 @@ bot.use(rememberUser);
 bot.command('ping', ping);
 bot.command('join', join);
 bot.command('leave', leave);
-
-bot.on('inline_query', inline);
 
 process.once('SIGINT', () => {
   closeConnection()
