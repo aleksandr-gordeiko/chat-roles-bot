@@ -1,5 +1,5 @@
 import { Telegraf } from 'telegraf';
-import { connectDB, closeConnection } from './db';
+import { closeConnection, connectDB } from './db';
 
 import reply from './middlewares/reply';
 import error from './middlewares/error';
@@ -20,6 +20,12 @@ bot.command('ping', ping);
 bot.command('join', join);
 bot.command('leave', leave);
 bot.on('text', findDoubleAtAndReact);
+
+bot.action(/^[join]+(-[a-z]+)?$/, async (ctx) => {
+  ctx.answerCbQuery();
+  ctx.state.roleChosen = ctx.match[1].split('-')[1];
+  return join(ctx);
+});
 
 process.once('SIGINT', () => {
   closeConnection()

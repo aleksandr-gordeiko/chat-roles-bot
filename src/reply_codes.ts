@@ -1,7 +1,7 @@
 const joinReplyCodes = {
   ADDED: 'Assigned role successfully',
   ALREADY_REGISTERED: 'User already has this role',
-  INVALID_ARGUMENT: 'Invalid role',
+  NO_ROLES_IN_CHAT: 'No roles in chat for now',
 };
 
 const leaveReplyCodes = {

@@ -101,6 +101,31 @@ const getUserIdsAndUsernamesFromRole = async (roleName: string, chatId: number):
   return idsAndUsernames;
 };
 
+const getChatRolesUserDoesNotHave = async (chatId: number, userId: number): Promise<string[]> => {
+  let collection: Collection;
+  try {
+    collection = db.collection(String(chatId));
+  } catch {
+    return [];
+  }
+
+  const rolesCursor: Cursor = await collection.find({});
+  const roles: string[] = [];
+  while (await rolesCursor.hasNext()) {
+    const roleObject = await rolesCursor.next();
+    const roleUserIds: number[] = roleObject.ids;
+
+    let flag = 0;
+    for (const id of roleUserIds) {
+      if (id === userId) flag = 1;
+    }
+    if (flag) continue;
+
+    roles.push(roleObject.role);
+  }
+  return roles;
+};
+
 export {
   saveOrUpdateUser,
   addUserIdToRole,
@@ -108,4 +133,5 @@ export {
   connectDB,
   closeConnection,
   getUserIdsAndUsernamesFromRole,
+  getChatRolesUserDoesNotHave,
 };
