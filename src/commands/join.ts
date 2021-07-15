@@ -10,6 +10,7 @@ const join = async (ctx: Context) => {
   let role;
   if (ctx.state.roleChosen) {
     role = ctx.state.roleChosen;
+    await ctx.deleteMessage();
   } else {
     role = (ctx.message as Message.TextMessage).text.split(' ')
       .slice(1)
