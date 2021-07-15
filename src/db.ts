@@ -96,6 +96,8 @@ const getUserIdsAndUsernamesFromRole = async (roleName: string, chatId: number):
     idsAndUsernames[value] = (await (await usersCollection.find({ id: value })).next()).username;
   }
 
+  if (Object.keys(idsAndUsernames).length === 0) return getRoleReplyCodes.COLLECTION_EMPTY;
+
   return idsAndUsernames;
 };
 
