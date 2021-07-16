@@ -36,7 +36,7 @@ const onDoubleAt = async (ctx: Context): Promise<void> => {
     ctx.state.reply_code = getRoleReplyCodes.COLLECTION_EMPTY;
     return;
   }
-  await ctx.reply(pings, { parse_mode: 'Markdown' });
+  await ctx.reply(pings, { parse_mode: 'Markdown', reply_to_message_id: ctx.message.message_id });
 };
 
 export default onDoubleAt;
