@@ -9,6 +9,7 @@ import ping from './commands/ping';
 import join from './commands/join';
 import leave from './commands/leave';
 import myroles from './commands/myroles';
+import roles from './commands/roles';
 import findDoubleAtAndReact from './onDoubleAt';
 
 const bot: Telegraf = new Telegraf(process.env.BOT_API_TOKEN);
@@ -21,6 +22,7 @@ bot.command('ping', ping);
 bot.command('join', join);
 bot.command('leave', leave);
 bot.command('myroles', myroles);
+bot.command('roles', roles);
 bot.on('text', findDoubleAtAndReact);
 
 bot.action(/^[join]+(-[a-z]+)?$/, async (ctx) => {

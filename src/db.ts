@@ -101,7 +101,7 @@ const getUserIdsAndUsernamesFromRole = async (roleName: string, chatId: number):
   return idsAndUsernames;
 };
 
-const getChatRoles = async (chatId: number, userId: number, doesUserHaveIt: boolean): Promise<string[]> => {
+const getChatRoles = async (chatId: number, userId?: number, doesUserHaveIt?: boolean): Promise<string[]> => {
   let collection: Collection;
   try {
     collection = db.collection(String(chatId));
@@ -111,17 +111,23 @@ const getChatRoles = async (chatId: number, userId: number, doesUserHaveIt: bool
 
   const rolesCursor: Cursor = await collection.find({});
   const roles: string[] = [];
-  while (await rolesCursor.hasNext()) {
-    const roleObject = await rolesCursor.next();
-    const roleUserIds: number[] = roleObject.ids;
+  if (userId !== undefined && doesUserHaveIt !== undefined) {
+    while (await rolesCursor.hasNext()) {
+      const roleObject = await rolesCursor.next();
+      const roleUserIds: number[] = roleObject.ids;
 
-    let flag = false;
-    for (const id of roleUserIds) {
-      if (id === userId) flag = true;
+      let flag = false;
+      for (const id of roleUserIds) {
+        if (id === userId) flag = true;
+      }
+      if (flag !== doesUserHaveIt) continue;
+
+      roles.push(roleObject.role);
     }
-    if (flag !== doesUserHaveIt) continue;
-
-    roles.push(roleObject.role);
+  } else {
+    while (await rolesCursor.hasNext()) {
+      roles.push((await rolesCursor.next()).role);
+    }
   }
   return roles;
 };

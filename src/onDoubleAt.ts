@@ -12,6 +12,7 @@ const onDoubleAt = async (ctx: Context): Promise<void> => {
   for (const word of wordArray) {
     if (word.slice(0, 2) === '@@') roles.push(word.slice(2));
   }
+  if (roles.length === 0) return;
 
   const users = {};
   for (const role of roles) {
