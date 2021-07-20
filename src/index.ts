@@ -11,6 +11,7 @@ import leave from './commands/leave';
 import myroles from './commands/myroles';
 import roles from './commands/roles';
 import findDoubleAtAndReact from './onDoubleAt';
+import onAdded from './onAdded';
 
 const bot: Telegraf = new Telegraf(process.env.BOT_API_TOKEN);
 
@@ -24,6 +25,7 @@ bot.command('leave', leave);
 bot.command('myroles', myroles);
 bot.command('roles', roles);
 bot.on('text', findDoubleAtAndReact);
+bot.on('my_chat_member', onAdded);
 
 bot.action(/^[join]+(-[a-z]+)?$/, async (ctx) => {
   ctx.answerCbQuery();
