@@ -3,14 +3,14 @@ import { Message } from 'typegram';
 import { getUserIdsAndUsernamesFromRole } from './db';
 import { getRoleReplyCodes } from './reply_codes';
 
-const onDoubleAt = async (ctx: Context): Promise<void> => {
+const onRoleMention = async (ctx: Context): Promise<void> => {
   const chatId: number = ctx.chat.id;
   const msg: string = (ctx.message as Message.TextMessage).text;
   const wordArray: string[] = msg.split(' ');
 
   const roles: string[] = [];
   for (const word of wordArray) {
-    if (word.slice(0, 2) === '@@') roles.push(word.slice(2));
+    if (word.slice(0, 2) === '//') roles.push(word.slice(2));
   }
   if (roles.length === 0) return;
 
@@ -40,4 +40,4 @@ const onDoubleAt = async (ctx: Context): Promise<void> => {
   await ctx.reply(pings, { parse_mode: 'Markdown', reply_to_message_id: ctx.message.message_id });
 };
 
-export default onDoubleAt;
+export default onRoleMention;
