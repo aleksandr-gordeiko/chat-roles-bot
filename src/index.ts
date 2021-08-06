@@ -12,6 +12,7 @@ import myroles from './commands/myroles';
 import roles from './commands/roles';
 import onRoleMention from './onRoleMention';
 import onAdded from './onAdded';
+import list from './commands/list';
 
 const bot: Telegraf = new Telegraf(process.env.BOT_API_TOKEN);
 
@@ -24,6 +25,7 @@ bot.command('join', join);
 bot.command('leave', leave);
 bot.command('myroles', myroles);
 bot.command('roles', roles);
+bot.command('list', list);
 bot.on('text', onRoleMention);
 bot.on('my_chat_member', onAdded);
 
