@@ -16,8 +16,14 @@ const getRoleReplyCodes = {
   COLLECTION_EMPTY: 'No users have this role',
 };
 
+const deleteRoleReplyCodes = {
+  ROLE_DOES_NOT_EXIST: 'The role does not exist',
+  ROLE_DELETED: 'Role successfully deleted',
+};
+
 export {
   joinReplyCodes,
   leaveReplyCodes,
   getRoleReplyCodes,
+  deleteRoleReplyCodes,
 };

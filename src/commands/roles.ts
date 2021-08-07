@@ -3,10 +3,9 @@ import { getChatRoles } from '../db';
 import { joinReplyCodes } from '../reply_codes';
 
 const roles = async (ctx: Context): Promise<void> => {
-  const userId: number = ctx.from.id;
   const chatId: number = ctx.chat.id;
 
-  await getChatRoles(chatId, userId, true)
+  await getChatRoles(chatId)
     .then(async (res) => {
       if (res.length === 0) {
         ctx.state.reply_code = joinReplyCodes.NO_ROLES_IN_CHAT;

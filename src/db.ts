@@ -6,7 +6,7 @@ import {
 import {
   joinReplyCodes,
   leaveReplyCodes,
-  getRoleReplyCodes,
+  getRoleReplyCodes, deleteRoleReplyCodes,
 } from './reply_codes';
 
 const { MongoClient } = require('mongodb');
@@ -73,6 +73,22 @@ const removeUserFromRole = async (user: User, roleName: string, chatId: number):
     return leaveReplyCodes.DELETED;
   }
   return leaveReplyCodes.USER_NOT_IN_COLLECTION;
+};
+
+const deleteRole = async (roleName: string, chatId: number): Promise<string> => {
+  let collection: Collection;
+  try {
+    collection = db.collection(String(chatId));
+  } catch {
+    return deleteRoleReplyCodes.ROLE_DOES_NOT_EXIST;
+  }
+
+  const rolesCursor: Cursor = await collection.find({ role: roleName });
+  if (await rolesCursor.hasNext()) {
+    await collection.deleteOne({ role: roleName });
+    return deleteRoleReplyCodes.ROLE_DELETED;
+  }
+  return deleteRoleReplyCodes.ROLE_DOES_NOT_EXIST;
 };
 
 const getUserIdsAndUsernamesFromRole = async (roleName: string, chatId: number): Promise<string | Object> => {
@@ -149,4 +165,5 @@ export {
   getUserIdsAndUsernamesFromRole,
   getChatRoles,
   addEveryoneRole,
+  deleteRole,
 };

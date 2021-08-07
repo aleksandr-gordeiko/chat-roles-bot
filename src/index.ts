@@ -13,6 +13,7 @@ import roles from './commands/roles';
 import onRoleMention from './onRoleMention';
 import onAdded from './onAdded';
 import list from './commands/list';
+import deletee from './commands/delete';
 
 const bot: Telegraf = new Telegraf(process.env.BOT_API_TOKEN);
 
@@ -26,6 +27,7 @@ bot.command('leave', leave);
 bot.command('myroles', myroles);
 bot.command('roles', roles);
 bot.command('list', list);
+bot.command('delete', deletee);
 bot.on('text', onRoleMention);
 bot.on('my_chat_member', onAdded);
 
@@ -39,6 +41,12 @@ bot.action(/^[leav]+(-[a-z]+)?$/, async (ctx) => {
   ctx.answerCbQuery();
   ctx.state.roleChosen = ctx.match[1].split('-')[1];
   return leave(ctx);
+});
+
+bot.action(/^[delt]+(-[a-z]+)?$/, async (ctx) => {
+  ctx.answerCbQuery();
+  ctx.state.roleChosen = ctx.match[1].split('-')[1];
+  return deletee(ctx);
 });
 
 process.once('SIGINT', () => {
