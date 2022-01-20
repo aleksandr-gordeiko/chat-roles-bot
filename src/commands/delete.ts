@@ -5,7 +5,7 @@ import { joinReplyCodes } from '../reply_codes';
 
 const deletee = async (ctx: Context): Promise<void> => {
   const chatId: number = ctx.chat.id;
-  // if ((await ctx.getChatMember(ctx.from.id)).status !== 'administrator') return;
+  if ((await ctx.getChatMember(ctx.from.id)).status !== 'administrator') return;
 
   let role;
   if (ctx.state.roleChosen) {

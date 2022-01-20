@@ -91,7 +91,7 @@ const deleteRole = async (roleName: string, chatId: number): Promise<string> => 
   return deleteRoleReplyCodes.ROLE_DOES_NOT_EXIST;
 };
 
-const getUserIdsAndUsernamesFromRole = async (roleName: string, chatId: number): Promise<string | Object> => {
+const getUserIdsFromRole = async (roleName: string, chatId: number): Promise<string | number[]> => {
   let collection: Collection;
   try {
     collection = db.collection(String(chatId));
@@ -105,6 +105,15 @@ const getUserIdsAndUsernamesFromRole = async (roleName: string, chatId: number):
   }
 
   const { ids } = await cursor.next();
+
+  return ids;
+};
+
+const getUserIdsAndUsernamesFromRole = async (roleName: string, chatId: number): Promise<string | Object> => {
+  const ids = await getUserIdsFromRole(roleName, chatId);
+  if (typeof ids === 'string') {
+    return ids;
+  }
 
   const usersCollection: Collection = db.collection('users');
   const idsAndUsernames: Object = {};
@@ -166,4 +175,5 @@ export {
   getChatRoles,
   addEveryoneRole,
   deleteRole,
+  getUserIdsFromRole,
 };
